@@ -14,43 +14,55 @@ import (
 )
 
 func main() {
-	masterURL := "https://192.168.99.140:8443"
+	// operatorMasterURL := "https://192.168.99.140:8443"
+	siteAMasterURL := "https://192.168.99.141:8443"
+	siteBMasterURL := "https://192.168.99.142:8443"
+	fmt.Printf("Pod list for SiteA at %s:\n", siteAMasterURL)
+	podList(siteAMasterURL)
+	fmt.Printf("Pod list for SiteB at %s:\n", siteBMasterURL)
+	podList(siteBMasterURL)
+}
+
+func podList(masterURL string) {
+	kubernetes := NewKubernetesFromMasterURL(masterURL)
+	printPodList(kubernetes)
+}
+
+func printPodList(kubernetes *Kubernetes) {
+	podList := &corev1.PodList{}
+	listOps := &client.ListOptions{Namespace: "kube-system"}
+	err := kubernetes.Client.List(context.TODO(), listOps, podList)
+	if err != nil {
+		panic(err.Error())
+	}
+	for _, pod := range podList.Items {
+		fmt.Printf("Pod: %s\n", pod.Name)
+	}
+}
+
+func NewKubernetesFromMasterURL(masterURL string) *Kubernetes {
 	kubeconfig := FindKubeConfig()
 	restConfig, err := clientcmd.BuildConfigFromFlags(masterURL, kubeconfig)
 	if err != nil {
 		panic(err.Error())
 	}
-
 	kubeClient, err := client.New(restConfig, client.Options{})
 	if err != nil {
 		panic(err.Error())
 	}
-
 	gv := v1.SchemeGroupVersion
 	restConfig.GroupVersion = &gv
 	restConfig.NegotiatedSerializer = serializer.DirectCodecFactory{CodecFactory: scheme.Codecs}
-
 	restClient, err := rest.RESTClientFor(restConfig)
 	if err != nil {
 		panic(err.Error())
 	}
-
 	kubernetes := &Kubernetes{
 		Client:     kubeClient,
 		restClient: restClient,
 		RestConfig: restConfig,
 	}
-
-	podList := &corev1.PodList{}
-	listOps := &client.ListOptions{Namespace: "kube-system"}
-	err = kubernetes.Client.List(context.TODO(), listOps, podList)
-	if err != nil {
-		panic(err.Error())
-	}
-
-	for _, pod := range podList.Items {
-		fmt.Printf("Pod: %s\n", pod.Name)
-	}
+	return kubernetes
 }
 
 func resolveConfig() *rest.Config {
