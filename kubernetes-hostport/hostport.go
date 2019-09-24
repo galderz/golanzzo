@@ -65,19 +65,6 @@ func NewKubernetesFromMasterURL(masterURL string) *Kubernetes {
 	return kubernetes
 }
 
-func resolveConfig() *rest.Config {
-	internal, _ := rest.InClusterConfig()
-	if internal == nil {
-		kubeConfig := FindKubeConfig()
-		clientConfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
-			&clientcmd.ClientConfigLoadingRules{ExplicitPath: kubeConfig},
-			&clientcmd.ConfigOverrides{})
-		external, _ := clientConfig.ClientConfig()
-		return external
-	}
-	return internal
-}
-
 // FindKubeConfig returns local Kubernetes configuration
 func FindKubeConfig() string {
 	kubeConfig := os.Getenv("KUBECONFIG")
@@ -85,15 +72,6 @@ func FindKubeConfig() string {
 		return kubeConfig
 	}
 	return "../../openshift.local.clusterup/kube-apiserver/admin.kubeconfig"
-}
-
-func setConfigDefaults(config *rest.Config) *rest.Config {
-	//gv := v1.SchemeGroupVersion
-	//config.GroupVersion = &gv
-	config.APIPath = "/api"
-//	config.NegotiatedSerializer = serializer.DirectCodecFactory{CodecFactory: scheme.Codecs}
-	config.UserAgent = rest.DefaultKubernetesUserAgent()
-	return config
 }
 
 // Kubernetes abstracts interaction with a Kubernetes cluster
