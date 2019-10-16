@@ -4,19 +4,17 @@ import (
 	"context"
 	"fmt"
 	corev1 "k8s.io/api/core/v1"
-	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
-	"os"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 func main() {
 	// operatorMasterURL := "https://192.168.99.140:8443"
-	siteAMasterURL := "https://192.168.99.141:8443"
-	siteBMasterURL := "https://192.168.99.142:8443"
+	siteAMasterURL := "https://192.168.99.143:8443"
+	siteBMasterURL := "https://192.168.99.144:8443"
 	fmt.Printf("Pod list for SiteA at %s:\n", siteAMasterURL)
 	podList(siteAMasterURL)
 	fmt.Printf("Pod list for SiteB at %s:\n", siteBMasterURL)
@@ -41,18 +39,20 @@ func printPodList(kubernetes *Kubernetes) {
 }
 
 func NewKubernetesFromMasterURL(masterURL string) *Kubernetes {
-	kubeconfig := FindKubeConfig()
-	restConfig, err := clientcmd.BuildConfigFromFlags(masterURL, kubeconfig)
+	restConfig, err := clientcmd.BuildConfigFromFlags(masterURL, "")
 	if err != nil {
 		panic(err.Error())
 	}
+	restConfig.Insecure = true
 	kubeClient, err := client.New(restConfig, client.Options{})
 	if err != nil {
 		panic(err.Error())
 	}
-	gv := v1.SchemeGroupVersion
+	gv := corev1.SchemeGroupVersion
 	restConfig.GroupVersion = &gv
+	// restConfig.APIPath = "/api"
 	restConfig.NegotiatedSerializer = serializer.DirectCodecFactory{CodecFactory: scheme.Codecs}
+	// restConfig.UserAgent = rest.DefaultKubernetesUserAgent()
 	restClient, err := rest.RESTClientFor(restConfig)
 	if err != nil {
 		panic(err.Error())
@@ -65,14 +65,24 @@ func NewKubernetesFromMasterURL(masterURL string) *Kubernetes {
 	return kubernetes
 }
 
-// FindKubeConfig returns local Kubernetes configuration
-func FindKubeConfig() string {
-	kubeConfig := os.Getenv("KUBECONFIG")
-	if kubeConfig != "" {
-		return kubeConfig
-	}
-	return "../../openshift.local.clusterup/kube-apiserver/admin.kubeconfig"
-}
+//func addToScheme(schemeBuilder *runtime.SchemeBuilder, scheme *runtime.Scheme) {
+//	err := schemeBuilder.AddToScheme(scheme)
+//	ExpectNoError(err)
+//}
+//
+//func createOptions() client.Options {
+//	var clientScheme = runtime.NewScheme()
+//	addToScheme(&corev1.SchemeBuilder, clientScheme)
+//	return client.Options{
+//		Scheme: clientScheme,
+//	}
+//}
+//
+//func ExpectNoError(err error) {
+//	if err != nil {
+//		panic(err.Error())
+//	}
+//}
 
 // Kubernetes abstracts interaction with a Kubernetes cluster
 type Kubernetes struct {
