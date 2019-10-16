@@ -43,7 +43,9 @@ func NewKubernetesFromMasterURL(masterURL string) *Kubernetes {
 	if err != nil {
 		panic(err.Error())
 	}
-	restConfig.Insecure = true
+	restConfig.CAFile = "/opt/minikube/.minikube/ca.crt"
+	restConfig.TLSClientConfig.KeyFile = "/opt/minikube/.minikube/client.key"
+	restConfig.TLSClientConfig.CertFile = "/opt/minikube/.minikube/client.crt"
 	kubeClient, err := client.New(restConfig, client.Options{})
 	if err != nil {
 		panic(err.Error())
