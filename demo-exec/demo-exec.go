@@ -35,6 +35,6 @@ func printMaxUnboundedMemoryBytes(podName string, namespace string, kubernetes *
 			}
 		}
 	}
-	err = fmt.Errorf("unexpected error getting max unbounded memory, stderr: %v, err: %v", execErr, err)
+	err = fmt.Errorf("unexpected error getting max unbounded memory, stderr: %s, err: %v", execErr, err)
 	util.ExpectNoError(err)
 }

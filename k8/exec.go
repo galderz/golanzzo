@@ -44,5 +44,9 @@ func (k Kubernetes) Execute(options ExecOptions) (bytes.Buffer, string, error) {
 		Stderr: &execErr,
 		Tty:    false,
 	})
+	if err != nil {
+		return execOut, execErr.String(), err
+	}
+
 	return execOut, "", err
 }
