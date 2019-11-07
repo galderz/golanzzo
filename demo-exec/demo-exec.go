@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/galderz/golfounded/k8"
-	"github.com/galderz/golfounded/util"
+	"github.com/galderz/golanzzo/k8"
+	"github.com/galderz/golanzzo/util"
 	"strconv"
 	"strings"
 )

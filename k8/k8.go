@@ -1,7 +1,7 @@
 package k8
 
 import (
-	"github.com/galderz/golfounded/util"
+	"github.com/galderz/golanzzo/util"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/runtime"
